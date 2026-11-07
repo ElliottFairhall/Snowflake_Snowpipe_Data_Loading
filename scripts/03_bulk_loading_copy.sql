@@ -1,11 +1,11 @@
 -- Basic COPY INTO
--- COPY INTO raw.staging.customers
+-- COPY INTO snowpipe_raw.staging.customers
 -- FROM @raw_data_stage/customers/
 -- FILE_FORMAT = (FORMAT_NAME = 'csv_format')
 -- ON_ERROR = 'CONTINUE';
 
 -- COPY with transformation
--- COPY INTO raw.staging.orders (order_id, customer_id, order_date, amount)
+-- COPY INTO snowpipe_raw.staging.orders (order_id, customer_id, order_date, amount)
 -- FROM (
 --     SELECT
 --         $1::INTEGER,
@@ -17,7 +17,7 @@
 -- FILE_FORMAT = (FORMAT_NAME = 'csv_format');
 
 -- COPY with pattern matching
--- COPY INTO raw.staging.events
+-- COPY INTO snowpipe_raw.staging.events
 -- FROM @raw_data_stage/events/
 -- FILE_FORMAT = (FORMAT_NAME = 'json_format')
 -- PATTERN = '.*2026-03.*\.json';

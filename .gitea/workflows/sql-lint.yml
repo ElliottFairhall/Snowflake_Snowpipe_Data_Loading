@@ -1,0 +1,50 @@
+name: SQL lint
+
+# Style findings are always warnings (summarised per file). Parse errors are
+# warnings too until a repo's SQL parses cleanly; then set FAIL_ON_PARSE_ERRORS
+# to 'true' in that repo's copy so they cannot regress. Some parse errors are
+# sqlfluff Snowflake-grammar gaps (scripting blocks, newer syntax), not bad SQL.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FAIL_ON_PARSE_ERRORS: 'true'
+
+jobs:
+  sqlfluff:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install sqlfluff
+        run: pip install --quiet sqlfluff
+
+      - name: Lint (style warns, parse errors per FAIL_ON_PARSE_ERRORS)
+        run: |
+          # sqlfluff exits non-zero on any violation; the check below decides.
+          sqlfluff lint . --dialect snowflake --format json > "${RUNNER_TEMP:-/tmp}/sqlfluff.json" || true
+          python3 - <<'PY'
+          import json, os, sys
+          p = os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), "sqlfluff.json")
+          results = json.load(open(p)) if os.path.getsize(p) else []
+          fail = os.environ.get("FAIL_ON_PARSE_ERRORS", "false").lower() == "true"
+          parse_errors, style = 0, 0
+          for f in results:
+              path = f["filepath"]
+              style_here = 0
+              for v in f["violations"]:
+                  if v["code"] == "PRS":
+                      parse_errors += 1
+                      level = "error" if fail else "warning"
+                      print(f"::{level} file={path},line={v['start_line_no']}::{v['description']}")
+                  else:
+                      style_here += 1
+              if style_here:
+                  style += style_here
+                  print(f"::warning file={path}::{style_here} SQL style finding(s)")
+          print(f"files checked: {len(results)}, parse errors: {parse_errors}, style findings: {style}")
+          sys.exit(1 if (parse_errors and fail) else 0)
+          PY

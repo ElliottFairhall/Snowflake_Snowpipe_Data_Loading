@@ -1,5 +1,7 @@
 # 🚀 Snowflake Snowpipe & Data Loading
 
+> Architecture and design rationale: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
 [![Snowflake](https://img.shields.io/badge/Snowflake-Cloud%20Data%20Platform-29B5E8?style=flat&logo=snowflake)](https://www.snowflake.com/)
 [![SQL](https://img.shields.io/badge/SQL-Snowflake%20Dialect-lightgrey)](https://docs.snowflake.com/)
 [![Status](https://img.shields.io/badge/Status-Educational-success)](https://github.com/ElliottFairhall/Snowflake_Snowpipe_Data_Loading)
